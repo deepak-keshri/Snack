@@ -1,0 +1,253 @@
+<html>
+  <title>Snack Return</title>
+  <head>
+    <style>
+      body{
+        /*background-image: url('bgSnack.jpg');*/
+        background-image: radial-gradient(black,yellow);
+      }
+      #gameArea{
+        border: 14px solid white;
+        height: 560px;
+        width: 560px;
+        position: absolute;
+        left: 390px;
+        background-image: radial-gradient(white,yellow);
+        overflow: hidden;
+      }
+      #food,.sbody{
+        display: inline-block;
+        margin: 0px;
+        position: relative;
+        left: 0px;
+        top: 0px;
+      }
+      .sbody{
+        
+        border: 2px solid black;
+        float: left;
+        background-color: black;
+        height: 12px;
+        width: 12px;
+        border-radius: 25%;
+      }
+     .sbody:nth-child(even)
+     {
+       background-color: red;
+       border: 2px solid red;
+     }
+      #score{
+        height: 100px;
+        width: 300px;
+        border: 3px groove green;
+        position: absolute;
+        font-weight: bold;
+        background-color: blue;
+        font-size: 30px;
+        color: white;
+        top: 200px;
+        left: 10px;
+        border-radius: 20px;
+        text-align: center; 
+        padding: 10px;
+        margin: 15px;
+      }
+      #out{
+        height: 150px;
+        width: 300px;
+        background-color: rgba(0, 0, 0, 0.918);
+        border: 5px groove blue;
+        color: white;
+        font-size: 30px;
+        text-align: center;
+        padding: 10px;
+        margin: 20px;
+        position: absolute;
+        top: 200px;
+        left: 530px;
+        cursor: pointer;
+        border-radius: 20px;
+        box-shadow: 0px 0px 43px black;
+        visibility: hidden;
+      }
+    </style>
+  </head>
+  <body onkeydown="Go(event)" onload="Position()">
+
+    <div id="gameArea">
+      <span class="sbody" style="background-color: blue;border: 2px solid blue;"></span>
+      <span class="sbody"></span>
+      <span class="sbody"></span>      
+    </div>
+    <img src="ap.png" height="18" width="16" id="food"></span>
+    <div id="score">
+      <div>Your Score is : <span id="sc">0</span></div>
+      <div><b>Highest Score: <span id="high">0</span></b></div>
+    </div>
+
+    <div id="out" onclick="SetMe()">
+      <b style="color: yellow;">Best Performence</b><br>
+      <b>Score : <span id="scme">0</span></b><br>
+      <b style="color: orange;">Click to Again Play the Game</b>
+    </div>
+
+    <script>
+      var t=0,l=0,dir=37,ch=0,points=0,again=0;
+      var speed=16,l1,l2,t1,t2;
+      
+      //localStorage.setItem("P","0");
+      var time=setInterval("Go(0)",200);
+
+      var ft=0;//first time;
+      function Go(ev)
+      {
+        document.getElementById("high").innerHTML=localStorage.getItem("P");
+        var sbody=document.getElementsByClassName("sbody");
+        
+        for(var i=0;i<sbody.length;i++) // Because each body of snack 
+        { 
+          l=parseInt(sbody[i].style.left);  // it find current positon of snack.
+          t=parseInt(sbody[i].style.top);
+          
+          if(ft==0)   // first time current position is blank then assign 0.
+          l=t=0;
+
+          l1=l; // used for previouse position of snack and arrenge each body of snack.
+          t1=t;
+
+          if(i==0)  // It only work if key press true.
+          {
+            if(ev.keyCode==37 && dir!=39)
+              l=l-speed,dir=37,ch=1;
+            else if(ev.keyCode==38 && dir!=40)
+              t=t-speed,dir=38,ch=1;
+            else if(ev.keyCode==39 && dir!=37)
+              l=l+speed,dir=39,ch=1;
+            else if(ev.keyCode==40 && dir!=38)
+              t=t+speed,dir=40,ch=1;     
+          }             
+            
+          if(ch==0)   // when key pres then not work but after key press then work for infinite time.
+          {
+            if(dir==37)
+            l=l-speed;
+            else if(dir==38)
+            t=t-speed;
+            else if(dir==39)
+            l=l+speed;
+            else if(dir==40)
+            t=t+speed;
+          }
+
+          var vl=-(i)*16; // each body of snack is relative position then we used and multiply 16.
+            
+          if(l<vl)          // if snack are going left or top then enter right or bottom.  
+            l=(544-i*16);
+          else if(l>544)
+            l=0+i*16;
+          else if(t<0)
+            t=544;
+          else if(t>544)
+            t=0;
+ 
+          if(i==0)  // It is only for face of snack move work
+          {
+            sbody[i].style.left=l+"px";
+            sbody[i].style.top=t+"px";
+          }
+          else  // It is arrenge all the body of snack.
+          {
+            sbody[i].style.left=l2+"px";
+            sbody[i].style.top=t2+"px";
+          }          
+          l2=l1-16;
+          t2=t1;
+        }
+        ft=1; // Only work first time.
+        ch=0; // Again move snack so assign value 0.
+        CheckHit() // check food are hit or not
+        CheckOut();
+      }
+
+      function CheckHit()
+      {
+        var food=document.getElementById("food");
+        var sbody=document.getElementsByClassName("sbody")[0];
+
+        var fpos=food.getBoundingClientRect();  // find the value of left,right,top,bottom.
+        var spos=sbody.getBoundingClientRect();
+
+        if(fpos.left==spos.left && fpos.top==spos.top)
+        {
+          var ele=document.getElementsByClassName("sbody");
+          var len=ele.length;
+          len--;
+          var span=document.createElement('span');
+          span.setAttribute('class','sbody');
+          document.getElementById("gameArea").appendChild(span);
+          span.style.top=ele[len].style.top;
+          span.style.left=(parseInt(ele[len].style.left)-16)+"px";
+          points++;
+          document.getElementById("sc").innerHTML="<b>"+points+"</b>";
+          Position();
+
+          console.log(localStorage.getItem("P"));
+          if(localStorage.getItem("P")<points)
+          {
+            localStorage.setItem("P",points);
+            document.getElementById("high").innerHTML=points;
+          }
+        }
+      }
+
+      function Position()
+      {
+        /* Find random position*/
+        var food=document.getElementById("food");
+        var ft=Math.floor(Math.random()*1000);  // food top position.
+        var fl=Math.floor(Math.random()*1000);  // food left position
+        
+        // set the correct positioin of food of snack.
+        if(ft>540)
+        ft=999-ft;
+
+        if(fl>540)
+        fl=999-fl;
+
+        rem=fl%16;  // 
+        fl=fl-rem-4;
+
+        rem=ft%16;
+        ft=ft-rem;
+
+        food.style.top=ft+30;
+        food.style.left=fl+416;
+      }
+      
+      function CheckOut()
+      {
+        let sb=document.getElementsByClassName("sbody");
+        let ls,face=sb[0].getBoundingClientRect();
+        for(let i=1;i<sb.length;i++)
+        {
+          ls=sb[i].getBoundingClientRect();    
+
+          if(face.left==ls.left && face.top==ls.top)
+          { 
+            document.getElementById("gameArea").style.backgroundColor="grey";
+            var out=document.getElementById("out");
+            out.style.visibility="visible";
+            clearInterval(time);
+            document.getElementById("scme").innerHTML=points;
+          }
+        }        
+      }
+      function SetMe()
+      {
+        location.reload();
+        document.getElementById("out").style.visibility="hidden"; 
+      }
+
+    </script>
+  </body>
+</html>
